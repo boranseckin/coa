@@ -15,8 +15,6 @@
 
 #include "common.h"
 
-// void handleConn(int sock);
-
 void server() {
     int sockfd, newsockfd, clilen, pid;
     struct sockaddr_in serv_addr, cli_addr;
