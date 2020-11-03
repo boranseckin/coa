@@ -25,7 +25,7 @@ void server() {
     if (sockfd < 0)
         error("Error opening socket");
     
-    bzero(&serv_addr, sizeof(serv_addr));
+    memset(&serv_addr, 0, sizeof(serv_addr));
     
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
@@ -58,7 +58,7 @@ void handleConn(int sock) {
     long n;
     char buffer[256];
 
-    bzero(&buffer, 256);
+    memset(&buffer, 0, 256);
     
     n = read(sock, buffer, 255);
     if (n < 0)

@@ -24,7 +24,6 @@ void client(char *addr) {
     struct hostent *server;
 
     char buffer[256];
-    bzero(buffer, 256);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -36,7 +35,7 @@ void client(char *addr) {
         exit(0);
     }
 
-    bzero(&serv_addr, sizeof(serv_addr));
+    memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
     serv_addr.sin_port = htons(PORT);
@@ -48,12 +47,13 @@ void client(char *addr) {
     printf("Done\n");
     printf("Enter message: ");
 
+    memset(&buffer, 0, 256);
     fgets(buffer, 255, stdin);
     n = write(sockfd, buffer, strlen(buffer));
     if (n < 0)
         error("Error writing to socket");
 
-    bzero(buffer, 256);
+    memset(&buffer, 0, 256);
     n = read(sockfd, buffer, 255);
     if (n < 0)
         error("Error reading from socket");
