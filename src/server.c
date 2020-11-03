@@ -17,7 +17,7 @@
 
 // void handleConn(int sock);
 
-int server() {
+void server() {
     int sockfd, newsockfd, clilen, pid;
     struct sockaddr_in serv_addr, cli_addr;
     
@@ -52,8 +52,6 @@ int server() {
         }
         else close(newsockfd);
     }
-    
-    return 0;
 }
 
 void handleConn(int sock) {

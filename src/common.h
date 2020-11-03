@@ -14,8 +14,8 @@
 #define PORT 8080
 
 void error(char *msg);
-int server();
+void server();
 void handleConn(int sock);
-int client(char *addr);
+void client(char *addr);
 
 #endif /* common_h */

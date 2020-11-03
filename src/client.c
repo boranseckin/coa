@@ -16,7 +16,7 @@
 
 #include "common.h"
 
-int client(char *addr) {
+void client(char *addr) {
     int sockfd;
     long n;
 
@@ -59,6 +59,4 @@ int client(char *addr) {
         error("Error reading from socket");
 
     printf("%s\n", buffer);
-
-    return 0;
 }
