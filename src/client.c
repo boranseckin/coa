@@ -60,7 +60,10 @@ void client(char *addr) {
     if (n < 0)
         error("Error reading from socket");
 
-    if (strtoul(buffer, NULL, 10) == msgHash) {
-        printf("correct hash\n");
+    if (strtoul(buffer, NULL, 10) != msgHash) {
+        fprintf(stderr, "Error verifying checksum from server\n");
+        exit(0);
     }
+
+    printf("correct hash\n");
 }
