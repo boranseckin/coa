@@ -79,7 +79,8 @@ void client(char *addr, int method, char *input) {
             error("Error reading file into memory");
     }
     if (method == 1) {
-        read_size = strlcpy(buffer, input, size + 1);
+        strcpy(buffer, input);
+        read_size = strlen(buffer);
         if (read_size != size)
             error("Error reading input into memory");
     }
