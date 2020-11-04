@@ -53,10 +53,14 @@ void client(char *addr) {
     if (n < 0)
         error("Error writing to socket");
 
+    unsigned long msgHash = hash(buffer);
+
     memset(&buffer, 0, 256);
     n = read(sockfd, buffer, 255);
     if (n < 0)
         error("Error reading from socket");
 
-    printf("%s\n", buffer);
+    if (strtoul(buffer, NULL, 10) == msgHash) {
+        printf("correct hash\n");
+    }
 }

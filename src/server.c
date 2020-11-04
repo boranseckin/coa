@@ -64,8 +64,9 @@ void handleConn(int sock) {
 
     printf("Message: %s\n", buffer);
 
-    char * response = "Message has been recieved from server";
-    n = write(sock, response, strlen(response));
+    sprintf(buffer, "%lu", hash(buffer));
+    
+    n = write(sock, buffer, strlen(buffer));
     if (n < 0)
         error("Error writing to socket");
 }
