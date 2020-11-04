@@ -40,7 +40,7 @@ void client(char *addr) {
     memcpy(&serv_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
     serv_addr.sin_port = htons(PORT);
 
-    printf("Connecting to %s...", server->h_name);
+    printf("Connecting to %s...\n", server->h_name);
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
         error("Error connecting");
 
