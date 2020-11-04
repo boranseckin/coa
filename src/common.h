@@ -14,6 +14,7 @@
 #define PORT 8080
 
 void error(char *msg);
+unsigned long hash(char *str);
 void server();
 void handleConn(int sock);
 void client(char *addr);
