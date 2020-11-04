@@ -16,14 +16,28 @@
 
 #include "common.h"
 
-void client(char *addr) {
+void client(char *addr, char *filename) {
     int sockfd;
-    long n;
+    long n, size;
 
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
-    char buffer[256];
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+        error("Error opening file");
+
+    fseek(file, 0, SEEK_END);
+    size = ftell(file);
+    rewind(file);
+
+    if (size > SIZE) {
+        fprintf(stderr, "Error, file is too big\n");
+        exit(1);
+    } else if (size == 0) {
+        fprintf(stderr, "Error, file is empty\n");
+        exit(1);
+    }
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -44,26 +58,36 @@ void client(char *addr) {
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
         error("Error connecting");
 
-    printf("Done\n");
-    printf("Enter message: ");
+    char *buffer = malloc(sizeof(char) * size);
+    if (buffer == NULL) {
+        fprintf(stderr, "Error, allocating memory\n");
+        exit(0);
+    }
 
-    memset(&buffer, 0, 256);
-    fgets(buffer, 255, stdin);
+    long readSize = fread(buffer, 1, size, file);
+    if (readSize != size)
+        error("Error reading file into memory");
+
+    printf("read: %ld, size: %ld\n", readSize, size);
+
     n = write(sockfd, buffer, strlen(buffer));
     if (n < 0)
         error("Error writing to socket");
 
     unsigned long msgHash = hash(buffer);
 
-    memset(&buffer, 0, 256);
-    n = read(sockfd, buffer, 255);
+    memset(buffer, 0, size);
+    n = read(sockfd, buffer, size);
     if (n < 0)
         error("Error reading from socket");
 
     if (strtoul(buffer, NULL, 10) != msgHash) {
-        fprintf(stderr, "Error verifying checksum from server\n");
+        fprintf(stderr, "Error, verifying checksum with server\n");
         exit(0);
     }
 
     printf("correct hash\n");
+
+    free(buffer);
+    fclose(file);
 }

@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "common.h"
 
@@ -54,19 +55,48 @@ void server() {
 
 void handleConn(int sock) {
     long n;
-    char buffer[256];
+    char filename[40];
 
-    memset(&buffer, 0, 256);
-    
-    n = read(sock, buffer, 255);
+    char *buffer = malloc(SIZE);
+    if (buffer == NULL) {
+        error("Error allocating memory");
+    }
+
+    memset(buffer, 0, SIZE);
+
+    n = read(sock, buffer, SIZE);
     if (n < 0)
         error("Error reading from socket");
+    else if (n == 0) {
+        printf("Not recieved any bytes... passing\n");
+        exit(0);
+    }
 
-    printf("Message: %s\n", buffer);
+    printf("Recieved %ld bytes\n", n);
+
+    // https://stackoverflow.com/a/1442131/10161292
+    time_t ts = time(NULL);
+    struct tm tm = *localtime(&ts);
+    sprintf(filename, "%d-%02d-%02d_%02d-%02d-%02d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        fprintf(stderr, "Error, opening new file\n");
+        exit(0);
+    }
+
+    printf("Saved in %s\n", filename);
+
+    n = fwrite(buffer, 1, strlen(buffer), file);
+    if (n != strlen(buffer))
+        error("Error writing into file");
 
     sprintf(buffer, "%lu", hash(buffer));
     
     n = write(sock, buffer, strlen(buffer));
     if (n < 0)
         error("Error writing to socket");
+
+    free(buffer);
+    fclose(file);
 }

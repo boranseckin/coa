@@ -37,10 +37,10 @@ int main(int argc, char *argv[]) {
         server();
     }
     else if (strcmp(argv[1], "-c") == 0) {
-        if (argc != 3) {
+        if (argc < 3) {
             fprintf(stderr, "Error: Hostname was not supplied\n");
             exit(1);
         }
-        client(argv[2]);
+        client(argv[2], argv[3]);
     }
 }
