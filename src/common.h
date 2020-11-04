@@ -12,11 +12,12 @@
 #include <stdio.h>
 
 #define PORT 8080
+#define SIZE 65536
 
 void error(char *msg);
 unsigned long hash(char *str);
 void server();
 void handleConn(int sock);
-void client(char *addr);
+void client(char *addr, int method, char *input);
 
 #endif /* common_h */
