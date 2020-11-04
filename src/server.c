@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -63,7 +64,6 @@ void handleConn(int sock) {
     }
 
     memset(buffer, 0, SIZE);
-
     n = read(sock, buffer, SIZE);
     if (n < 0)
         error("Error reading from socket");
@@ -91,9 +91,12 @@ void handleConn(int sock) {
     if (n != strlen(buffer))
         error("Error writing into file");
 
-    sprintf(buffer, "%lu", hash(buffer));
+    unsigned long msg_hash = hash(buffer);
     
-    n = write(sock, buffer, strlen(buffer));
+    memset(buffer, 0, pow(2, sizeof(unsigned long)));
+    n = sprintf(buffer, "%lu", msg_hash);
+
+    n = write(sock, buffer, n);
     if (n < 0)
         error("Error writing to socket");
 

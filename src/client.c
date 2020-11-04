@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -16,27 +17,34 @@
 
 #include "common.h"
 
-void client(char *addr, char *filename) {
+void client(char *addr, int method, char *input) {
     int sockfd;
-    long n, size;
+    long n, size, buffer_size, read_size;
+    char *buffer;
+    FILE *file;
 
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
-    FILE *file = fopen(filename, "r");
-    if (file == NULL)
-        error("Error opening file");
+    if (method == 0) {
+        file = fopen(input, "r");
+        if (file == NULL)
+            error("Error opening file");
 
-    fseek(file, 0, SEEK_END);
-    size = ftell(file);
-    rewind(file);
+        fseek(file, 0, SEEK_END);
+        size = ftell(file);
+        rewind(file);
 
-    if (size > SIZE) {
-        fprintf(stderr, "Error, file is too big\n");
-        exit(1);
-    } else if (size == 0) {
-        fprintf(stderr, "Error, file is empty\n");
-        exit(1);
+        if (size > SIZE) {
+            fprintf(stderr, "Error, file is too big\n");
+            exit(1);
+        } else if (size == 0) {
+            fprintf(stderr, "Error, file is empty\n");
+            exit(1);
+        }
+    }
+    if (method == 1) {
+        size = strlen(input);
     }
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -58,30 +66,38 @@ void client(char *addr, char *filename) {
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
         error("Error connecting");
 
-    char *buffer = malloc(sizeof(char) * size);
+    buffer = malloc(SIZE);
     if (buffer == NULL) {
         fprintf(stderr, "Error, allocating memory\n");
         exit(0);
     }
+    memset(buffer, 0, SIZE);
 
-    long readSize = fread(buffer, 1, size, file);
-    if (readSize != size)
-        error("Error reading file into memory");
+    if (method == 0) {
+        read_size = fread(buffer, 1, size, file);
+        if (read_size != size)
+            error("Error reading file into memory");
+    }
+    if (method == 1) {
+        read_size = strlcpy(buffer, input, size + 1);
+        if (read_size != size)
+            error("Error reading input into memory");
+    }
 
-    printf("read: %ld, size: %ld\n", readSize, size);
+    printf("read: %ld, size: %ld\n", read_size, size);
 
     n = write(sockfd, buffer, strlen(buffer));
     if (n < 0)
         error("Error writing to socket");
 
-    unsigned long msgHash = hash(buffer);
+    unsigned long msg_hash = hash(buffer);
 
-    memset(buffer, 0, size);
-    n = read(sockfd, buffer, size);
+    memset(buffer, 0, pow(2, sizeof(unsigned long)));
+    n = read(sockfd, buffer, pow(2, sizeof(unsigned long)));
     if (n < 0)
         error("Error reading from socket");
 
-    if (strtoul(buffer, NULL, 10) != msgHash) {
+    if (strtoul(buffer, NULL, 10) != msg_hash) {
         fprintf(stderr, "Error, verifying checksum with server\n");
         exit(0);
     }

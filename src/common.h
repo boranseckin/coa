@@ -18,6 +18,6 @@ void error(char *msg);
 unsigned long hash(char *str);
 void server();
 void handleConn(int sock);
-void client(char *addr, char *filename);
+void client(char *addr, int method, char *input);
 
 #endif /* common_h */

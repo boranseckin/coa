@@ -29,18 +29,27 @@ unsigned long hash(char *str)
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: ./coa [Server/Client] [Host]\n");
+        fprintf(stderr, "Usage: ./coa [-s] [-c host] [-f filename] [-m string]\n");
         exit(1);
     }
 
     if (strcmp(argv[1], "-s") == 0) {
         server();
+        return 0;
     }
-    else if (strcmp(argv[1], "-c") == 0) {
-        if (argc < 3) {
-            fprintf(stderr, "Error: Hostname was not supplied\n");
-            exit(1);
+
+    if (argc == 5) {
+        if (strcmp(argv[3], "-f") == 0) {
+            client(argv[2], 0, argv[4]);
+            return 0;
         }
-        client(argv[2], argv[3]);
+
+        if (strcmp(argv[3], "-m") == 0) {
+            client(argv[2], 1, argv[4]);
+            return 0;
+        }
     }
+
+    fprintf(stderr, "Usage: ./coa [-s] [-c host] [-f filename] [-m string]\n");
+    exit(1);
 }
