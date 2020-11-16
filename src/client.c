@@ -93,7 +93,7 @@ void client(char *addr, int method, char *input) {
 
     unsigned long msg_hash = hash(buffer);
 
-    memset(buffer, 0, pow(2, sizeof(unsigned long)));
+    memset(buffer, 0, SIZE);
     n = read(sockfd, buffer, pow(2, sizeof(unsigned long)));
     if (n < 0)
         error("Error reading from socket");
@@ -103,8 +103,9 @@ void client(char *addr, int method, char *input) {
         exit(0);
     }
 
-    printf("correct hash\n");
+    printf("correct hash: %s\n", buffer);
 
     free(buffer);
-    fclose(file);
+    if (method == 0)
+        fclose(file);
 }
