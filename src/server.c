@@ -17,7 +17,7 @@
 
 #include "common.h"
 
-void server() {
+void server(int mode) {
     int sockfd, newsockfd, clilen, pid;
     struct sockaddr_in serv_addr, cli_addr;
     
@@ -47,16 +47,17 @@ void server() {
             error("Error forking");
         if (pid == 0) {
             close(sockfd);
-            handleConn(newsockfd);
+            handleConn(newsockfd, &mode);
             exit(0);
         }
         else close(newsockfd);
     }
 }
 
-void handleConn(int sock) {
+void handleConn(int sock, int *mode) {
     long n;
     char filename[40];
+    FILE *file;
 
     char *buffer = malloc(SIZE);
     if (buffer == NULL) {
@@ -74,22 +75,27 @@ void handleConn(int sock) {
 
     printf("Recieved %ld bytes\n", n);
 
-    // https://stackoverflow.com/a/1442131/10161292
-    time_t ts = time(NULL);
-    struct tm tm = *localtime(&ts);
-    sprintf(filename, "%d-%02d-%02d_%02d-%02d-%02d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    if (*mode == 0) {
+        // https://stackoverflow.com/a/1442131/10161292
+        time_t ts = time(NULL);
+        struct tm tm = *localtime(&ts);
+        sprintf(filename, "%d-%02d-%02d_%02d-%02d-%02d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
-    FILE *file = fopen(filename, "w");
-    if (file == NULL) {
-        fprintf(stderr, "Error, opening new file\n");
-        exit(0);
+        file = fopen(filename, "w");
+        if (file == NULL) {
+            fprintf(stderr, "Error, opening new file\n");
+            exit(0);
+        }
+
+        n = fwrite(buffer, 1, strlen(buffer), file);
+        if (n != strlen(buffer))
+            error("Error writing into file");
+        
+        printf("Saved in %s\n", filename);
     }
-
-    printf("Saved in %s\n", filename);
-
-    n = fwrite(buffer, 1, strlen(buffer), file);
-    if (n != strlen(buffer))
-        error("Error writing into file");
+    else {
+        printf("%s\n", buffer);
+    }
 
     unsigned long msg_hash = hash(buffer);
     
@@ -101,5 +107,6 @@ void handleConn(int sock) {
         error("Error writing to socket");
 
     free(buffer);
-    fclose(file);
+    if (*mode == 0)
+        fclose(file);
 }

@@ -34,7 +34,10 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(argv[1], "-s") == 0) {
-        server();
+        if (argc == 3 && strcmp(argv[2], "--no-save") == 0)
+            server(1);
+        else
+            server(0);
         return 0;
     }
 

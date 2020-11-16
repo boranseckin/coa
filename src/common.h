@@ -16,8 +16,8 @@
 
 void error(char *msg);
 unsigned long hash(char *str);
-void server();
-void handleConn(int sock);
+void server(int mode);
+void handleConn(int sock, int *mode);
 void client(char *addr, int method, char *input);
 
 #endif /* common_h */
